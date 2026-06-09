@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="ko" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARCHI-MATRIX | BIG-Inspired Portfolio</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Space Grotesk (for bold headers) & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        big: {
+                            bgLight: '#ffffff',
+                            bgDark: '#0a0a0a',
+                            accent: '#10b981', // Electric Green
+                            accentHover: '#059669',
+                            borderLight: '#e5e7eb',
+                            borderDark: '#262626',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        grotesk: ['Space Grotesk', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        /* Custom scrollbar matching the minimal theme */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #10b981;
+            border-radius: 2px;
+        }
+        /* Grid cell transitions */
+        .matrix-cell {
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .matrix-cell:hover .diagram-svg {
+            transform: scale(1.1) rotate(2deg);
+        }
+        /* Diagonal lines or blueprint look */
+        .blueprint-bg {
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, rgba(16, 185, 129, 0.05) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(16, 185, 129, 0.05) 1px, transparent 1px);
+        }
+        .dark .blueprint-bg {
+            background-image: linear-gradient(to right, rgba(16, 185, 129, 0.08) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(16, 185, 129, 0.08) 1px, transparent 1px);
+        }
+    </style>
+</head>
+<body class="bg-white text-black dark:bg-[#0a0a0a] dark:text-white min-h-screen selection:bg-big-accent selection:text-white blueprint-bg overflow-x-hidden">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-40 bg-white/90 dark:bg-[#0a0a0a]/90 backdrop-blur-md border-b border-black dark:border-white py-4 px-6 md:px-12 flex justify-between items-center">
+        <div class="flex items-baseline space-x-6">
+            <a href="#" class="font-grotesk text-2xl md:text-3xl font-extrabold tracking-tighter">
+                ARCHI<span class="text-big-accent">+</span>MATRIX
+            </a>
+            <span class="hidden lg:inline text-xs font-mono text-gray-500 uppercase tracking-widest">
+                PRAGMATIC UTOPIANISM / PORTFOLIO J.S. KIM
+            </span>
+        </div>
+
+        <!-- Navigation and Mode Toggles -->
+        <div class="flex items-center space-x-6">
+            <nav class="hidden md:flex space-x-6 text-xs uppercase tracking-widest font-mono">
+                <a href="#matrix-section" class="hover:text-big-accent transition-colors">Matrix</a>
+                <a href="#diagram-stepper-section" class="hover:text-big-accent transition-colors">Yes Is More</a>
+                <a href="#philosophy-section" class="hover:text-big-accent transition-colors font-bold text-big-accent">BIG LEAP</a>
+                <a href="#contact" class="hover:text-big-accent transition-colors">Contact</a>
+            </nav>
+            
+            <!-- Dark Mode Toggle Button -->
+            <button onclick="toggleDarkMode()" class="p-2 border border-black dark:border-white rounded-sm hover:bg-big-accent hover:text-white transition-colors" aria-label="Toggle Dark Mode">
+                <i class="fa-solid fa-circle-half-stroke text-sm"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Matrix Control & Filtering Bar -->
+    <section id="matrix-section" class="border-b border-black dark:border-white py-6 px-6 md:px-12 bg-gray-50 dark:bg-zinc-900/50">
+        <div class="max-w-7xl mx-auto flex flex-col xl:flex-row xl:items-center justify-between gap-6">
+            
+            <!-- Sorting Controls (BIG Deck of Cards Sorting style) -->
+            <div class="flex flex-col md:flex-row md:items-center gap-4">
+                <span class="text-xs font-mono font-bold uppercase text-gray-500 tracking-wider">Sort Matrix by:</span>
+                <div class="flex flex-wrap gap-2 text-xs uppercase tracking-wider font-mono">
+                    <button onclick="sortMatrix('chronology')" id="btn-sort-chronology" class="px-3 py-1.5 border border-black dark:border-white bg-black text-white dark:bg-white dark:text-black transition-all">
+                        Chronological
+                    </button>
+                    <button onclick="sortMatrix('alphabetical')" id="btn-sort-alphabetical" class="px-3 py-1.5 border border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all">
+                        Alphabetical
+                    </button>
+                    <button onclick="sortMatrix('typology')" id="btn-sort-typology" class="px-3 py-1.5 border border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all">
+                        Typology
+                    </button>
+                    <button onclick="sortMatrix('scale')" id="btn-sort-scale" class="px-3 py-1.5 border border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all">
+                        Scale (S-XL)
+                    </button>
+                    <button onclick="sortMatrix('status')" id="btn-sort-status" class="px-3 py-1.5 border border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all">
+                        Status
+                    </button>
+                </div>
+            </div>
+
+            <!-- Division filtering (BIG LEAP categories) -->
+            <div class="flex flex-col md:flex-row md:items-center gap-4 border-t xl:border-t-0 pt-4 xl:pt-0 border-gray-300 dark:border-zinc-700">
+                <span class="text-xs font-mono font-bold uppercase text-gray-500 tracking-wider">Division:</span>
+                <div class="flex flex-wrap gap-1.5 text-xs uppercase tracking-wider font-mono">
+                    <button onclick="filterDivision('all')" class="div-filter-btn px-3 py-1.5 bg-big-accent text-white font-bold" data-div="all">
+                        +All
+                    </button>
+                    <button onclick="filterDivision('architecture')" class="div-filter-btn px-3 py-1.5 border border-black/10 dark:border-white/10 hover:border-big-accent" data-div="architecture">
+                        +Architecture
+                    </button>
+                    <button onclick="filterDivision('landscape')" class="div-filter-btn px-3 py-1.5 border border-black/10 dark:border-white/10 hover:border-big-accent" data-div="landscape">
+                        +Landscape
+                    </button>
+                    <button onclick="filterDivision('planning')" class="div-filter-btn px-3 py-1.5 border border-black/10 dark:border-white/10 hover:border-big-accent" data-div="planning">
+                        +Planning
+                    </button>
+                    <button onclick="filterDivision('interiors')" class="div-filter-btn px-3 py-1.5 border border-black/10 dark:border-white/10 hover:border-big-accent" data-div="interiors">
+                        +Interiors
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- The Project Grid Matrix -->
+    <main class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 border-b border-black dark:border-white" id="project-matrix-grid">
+        <!-- Javascript will inject 12+ meticulously styled cards containing SVGs and detailed stats here -->
+    </main>
+
+    <!-- Interactive Conceptual Diagram Stepper -->
+    <section id="diagram-stepper-section" class="py-20 px-6 md:px-12 border-b border-black dark:border-white bg-black text-white dark:bg-zinc-950">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                
+                <!-- Left: Stepper Information -->
+                <div class="lg:col-span-5 space-y-6">
+                    <span class="text-xs font-mono text-big-accent uppercase tracking-widest block"><i class="fa-solid fa-bezier-curve mr-1.5"></i> CONCEPT EVOLUTION DICTIONARY</span>
+                    <h2 class="font-grotesk text-3xl md:text-5xl font-extrabold tracking-tight uppercase leading-none">
+                        YES IS MORE:<br>기하학적 공간 진화
+                    </h2>
+                    <p class="text-zinc-400 text-sm md:text-base leading-relaxed">
+                        우리는 까다로운 법적 제한, 기후 조건, 대지 경사면이라는 난제를 피해 가지 않고, 그것을 변형의 동력으로 활용합니다. 하나의 평범한 정육면체가 복잡하고 실용적인 걸작으로 변모해 가는 진화 단계를 관찰해 보세요.
+                    </p>
+
+                    <!-- Interactive Nav Blocks -->
+                    <div class="flex space-x-2 pt-4">
+                        <button onclick="changeStep(1)" id="step-nav-1" class="step-nav-btn w-12 h-12 border border-white font-mono font-bold bg-white text-black transition-all">01</button>
+                        <button onclick="changeStep(2)" id="step-nav-2" class="step-nav-btn w-12 h-12 border border-white/30 font-mono font-bold hover:border-white transition-all">02</button>
+                        <button onclick="changeStep(3)" id="step-nav-3" class="step-nav-btn w-12 h-12 border border-white/30 font-mono font-bold hover:border-white transition-all">03</button>
+                        <button onclick="changeStep(4)" id="step-nav-4" class="step-nav-btn w-12 h-12 border border-white/30 font-mono font-bold hover:border-white transition-all">04</button>
+                    </div>
+                </div>
+
+                <!-- Right: High Fidelity SVG Stepper Simulator -->
+                <div class="lg:col-span-7 bg-zinc-900 border border-zinc-700 rounded-lg p-8 md:p-12 flex flex-col justify-between aspect-video relative overflow-hidden shadow-2xl">
+                    
+                    <!-- Structural Grid Blueprint in Box -->
+                    <div class="absolute inset-0 opacity-10" style="background-size: 20px 20px; background-image: linear-gradient(to right, white 1px, transparent 1px), linear-gradient(to bottom, white 1px, transparent 1px);"></div>
+                    
+                    <!-- Step Text Indicator -->
+                    <div class="flex justify-between items-center z-10">
+                        <span class="text-[10px] font-mono uppercase tracking-widest text-zinc-500">Volumetric Transformation Simulator</span>
+                        <span class="font-mono text-xs text-big-accent" id="step-count">STEP 01 / 04</span>
+                    </div>
+
+                    <!-- Centered SVG Projection (Dynamic based on JS) -->
+                    <div class="my-auto py-8 flex justify-center items-center z-10" id="step-svg-holder">
+                        <!-- Projected dynamic content -->
+                    </div>
+
+                    <!-- Explanation of Current Gesture -->
+                    <div class="z-10 bg-black/40 p-4 border-l-2 border-big-accent backdrop-blur-sm">
+                        <h4 class="font-grotesk text-lg font-bold text-white uppercase tracking-tight" id="step-title">1. Base Monolithic Block</h4>
+                        <p class="text-xs text-zinc-400 mt-1 leading-relaxed" id="step-desc">
+                            프로그램에 맞추어 할당된 최대 규모의 볼륨을 정직한 직육면체(Monolith) 매스로 대지 위에 위치시킵니다.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Philosophy & Big Leap Section -->
+    <section id="philosophy-section" class="py-24 px-6 md:px-12 border-b border-black dark:border-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
+                
+                <!-- Philosophy Text Block -->
+                <div class="space-y-6">
+                    <span class="text-xs font-mono text-big-accent uppercase tracking-widest block">THE BIG LEAP ETHOS</span>
+                    <h2 class="font-grotesk text-4xl md:text-6xl font-extrabold tracking-tighter uppercase leading-none">
+                        HEDONISTIC<br>SUSTAINABILITY
+                    </h2>
+                    <p class="text-gray-600 dark:text-zinc-400 text-sm md:text-base leading-relaxed">
+                        우리의 건축 철학은 **"희생 없는 친환경(Hedonistic Sustainability)"**에 기반합니다. 에너지를 아끼기 위해 불편함을 참는 것이 아닌, 스키를 탈 수 있는 쓰레기 소각장 발전소(CopenHill)나 물놀이 놀이터로 작동하는 홍수 조절용 제방처럼, 지속 가능한 건축이 일상에 더 크고 역동적인 재미와 효용을 준다는 믿음입니다.
+                    </p>
+                    <p class="text-gray-600 dark:text-zinc-400 text-sm md:text-base leading-relaxed">
+                        조경(Landscape), 엔지니어링(Engineering), 건축(Architecture), 도시계획(Planning), 그리고 제품디자인(Products) 분야의 유기적인 대도약(BIG LEAP)을 통해 세상을 더 풍요로운 공간으로 도면화합니다.
+                    </p>
+
+                    <div class="pt-6 border-t border-gray-200 dark:border-zinc-800 grid grid-cols-2 gap-6">
+                        <div>
+                            <span class="block font-mono text-3xl font-extrabold text-big-accent">800+</span>
+                            <span class="text-xs font-mono uppercase tracking-widest text-gray-500">Global Designers</span>
+                        </div>
+                        <div>
+                            <span class="block font-mono text-3xl font-extrabold text-big-accent">30+</span>
+                            <span class="text-xs font-mono uppercase tracking-widest text-gray-500">International Awards</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Graphic Showcase Block -->
+                <div class="bg-gray-100 dark:bg-zinc-900 border border-black dark:border-white p-8 md:p-12 rounded-lg flex flex-col justify-between">
+                    <div>
+                        <span class="text-[10px] font-mono text-gray-500 uppercase tracking-widest block mb-4">Yes is More / Manifesto</span>
+                        <p class="font-grotesk text-2xl md:text-3xl font-bold leading-tight uppercase italic text-gray-900 dark:text-white">
+                            "Architecture is the art of turning fiction into fact."
+                        </p>
+                        <p class="text-xs font-mono text-big-accent uppercase mt-2 tracking-widest">— BJARKE INGELS</p>
+                    </div>
+
+                    <!-- Mini Comic Grid mimicking 'Yes Is More' book style -->
+                    <div class="grid grid-cols-3 gap-3 pt-8">
+                        <div class="border border-black/10 dark:border-white/10 p-3 bg-white dark:bg-zinc-800 text-center rounded">
+                            <span class="text-xs font-mono text-big-accent font-bold">PRAGMATIC</span>
+                            <p class="text-[9px] text-gray-400 mt-1">현실적 타협</p>
+                        </div>
+                        <div class="border border-black/10 dark:border-white/10 p-3 bg-white dark:bg-zinc-800 text-center rounded">
+                            <span class="text-xs font-mono text-big-accent font-bold">UTOPIAN</span>
+                            <p class="text-[9px] text-gray-400 mt-1">이상적 꿈</p>
+                        </div>
+                        <div class="border-2 border-big-accent p-3 bg-white dark:bg-zinc-800 text-center rounded animate-pulse">
+                            <span class="text-xs font-mono text-big-accent font-bold">OVERLAP</span>
+                            <p class="text-[9px] text-gray-400 mt-1">우리가 만나는 곳</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Modular Contact Section -->
+    <section id="contact" class="py-24 px-6 md:px-12 bg-gray-50 dark:bg-zinc-900/40">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16">
+            
+            <!-- Left Info Panel -->
+            <div class="lg:col-span-5 space-y-6">
+                <span class="text-xs font-mono text-big-accent uppercase tracking-widest block">INITIATE COLLABORATION</span>
+                <h2 class="font-grotesk text-3xl md:text-5xl font-extrabold tracking-tight uppercase leading-none">
+                    LEAP WITH US
+                </h2>
+                <p class="text-sm text-gray-600 dark:text-zinc-400 leading-relaxed">
+                    새로운 프로젝트의 가능성을 탐구할 준비가 되셨습니까? 당사는 마스터플랜부터 혁신적 빌딩 시스템, 디테일한 조명 가구 디자인까지 전 카테고리를 종횡무진 개척합니다. 제안서를 아래 폼에 명시해 주시면 검토팀이 긴급 응대하겠습니다.
+                </p>
+                <div class="pt-4 space-y-3 font-mono text-xs">
+                    <p><i class="fa-solid fa-map-location-dot mr-2 text-big-accent"></i> SEOUL HQ: 서울특별시 종로구 삼청로 126, 3층</p>
+                    <p><i class="fa-solid fa-paper-plane mr-2 text-big-accent"></i> EMAIL: hq@archi-matrix.com</p>
+                    <p><i class="fa-solid fa-phone mr-2 text-big-accent"></i> LINE: +82 (02) 123-4567</p>
+                </div>
+            </div>
+
+            <!-- Right Inquiry Form -->
+            <div class="lg:col-span-7 bg-white dark:bg-black border border-black dark:border-white p-8 md:p-10 rounded-sm">
+                <form id="matrix-inquiry-form" class="space-y-6" onsubmit="handleFormSubmit(event)">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-[10px] font-mono uppercase tracking-wider text-gray-400 mb-2">PROJECT NAME / CLIENT</label>
+                            <input type="text" id="client-name" required class="w-full bg-transparent border-b border-black dark:border-white focus:border-big-accent py-2 text-sm focus:outline-none transition-colors" placeholder="Hong Gil Dong">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-mono uppercase tracking-wider text-gray-400 mb-2">EMAIL ADDRESS</label>
+                            <input type="email" id="client-email" required class="w-full bg-transparent border-b border-black dark:border-white focus:border-big-accent py-2 text-sm focus:outline-none transition-colors" placeholder="example@studio.com">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-[10px] font-mono uppercase tracking-wider text-gray-400 mb-2">PRIMARY DIVISION</label>
+                            <select id="project-div" class="w-full bg-transparent border-b border-black dark:border-white focus:border-big-accent py-2 text-sm focus:outline-none transition-colors">
+                                <option value="architecture">Architecture</option>
+                                <option value="landscape">Landscape</option>
+                                <option value="planning">Urban Planning</option>
+                                <option value="interiors">Interiors</option>
+                                <option value="products">Products</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-mono uppercase tracking-wider text-gray-400 mb-2">SCALE TYPE</label>
+                            <select id="project-scale" class="w-full bg-transparent border-b border-black dark:border-white focus:border-big-accent py-2 text-sm focus:outline-none transition-colors">
+                                <option value="S">Small (S) - Under 500m²</option>
+                                <option value="M">Medium (M) - 500m² to 2,000m²</option>
+                                <option value="L">Large (L) - 2,000m² to 10,000m²</option>
+                                <option value="XL">Extra Large (XL) - Over 10,000m²</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-mono uppercase tracking-wider text-gray-400 mb-2">BRIEF & SITE CONTEXT</label>
+                        <textarea id="project-brief" required rows="4" class="w-full bg-transparent border border-black/20 dark:border-white/20 focus:border-big-accent p-3 text-sm focus:outline-none transition-colors resize-none rounded-sm" placeholder="Please outline the site conditions, programmatic requirements, or environmental hurdles..."></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full bg-black text-white dark:bg-white dark:text-black font-mono font-bold uppercase tracking-widest text-xs py-4 hover:bg-big-accent hover:text-white dark:hover:bg-big-accent dark:hover:text-white transition-all duration-300">
+                        Submit Proposal Matrix
+                    </button>
+                </form>
+
+                <!-- Custom Interactive Success message -->
+                <div id="form-success" class="hidden text-center py-8 space-y-4">
+                    <div class="text-4xl text-big-accent"><i class="fa-solid fa-square-check"></i></div>
+                    <h4 class="font-grotesk text-xl font-bold uppercase">PROPOSAL INDEXED!</h4>
+                    <p class="text-xs text-gray-500 font-mono">가장 가까운 검토 설계 프로세스 단계로 이메일이 매핑 접수되었습니다.</p>
+                    <button onclick="resetForm()" class="px-4 py-2 border border-black dark:border-white text-xs font-mono hover:bg-big-accent hover:text-white transition-all">Submit Another Matrix</button>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black text-white dark:bg-zinc-950 border-t border-zinc-800 py-12 px-6 md:px-12 text-center md:text-left">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="space-y-2">
+                <span class="font-grotesk text-xl font-extrabold tracking-tighter">ARCHI<span class="text-big-accent">+</span>MATRIX</span>
+                <p class="text-[10px] text-zinc-500 font-mono">© 2026 ARCHI-MATRIX Studio. Highly Inspired by Bjarke Ingels Group design patterns.</p>
+            </div>
+            <div class="flex space-x-4 text-sm font-mono uppercase tracking-widest">
+                <a href="#" class="hover:text-big-accent">Instagram</a>
+                <a href="#" class="hover:text-big-accent">Behance</a>
+                <a href="#" class="hover:text-big-accent">Medium</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Project Blueprint Details Modal -->
+    <div id="project-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="bg-white text-black dark:bg-[#0a0a0a] dark:text-white border-2 border-black dark:border-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto relative shadow-2xl">
+            
+            <!-- Close trigger -->
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-black dark:text-white hover:text-big-accent z-10 p-2 bg-gray-100 dark:bg-zinc-800 rounded-full" aria-label="Close Project">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <!-- Populated via Javascript -->
+            <div id="modal-blueprint-container"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. CORE DATA DECK (Projects with Custom Handcrafted Architectural SVGs representing gestural form) ---
+        const projects = [
+            {
+                id: 'p1',
+                title: 'THE TWIST MUSEUM',
+                year: 2023,
+                alphabetical: 'Twist Museum',
+                typology: 'Public',
+                scale: 'M',
+                scaleRank: 2,
+                status: 'Completed',
+                division: 'architecture',
+                location: 'Jevnaker, Norway',
+                desc: '강줄기를 가로지르는 단순한 직사각형 상자를 정중앙에서 90도 회전(Twist)시킨 형태입니다. 이 간단한 회전 제스처를 통해 다리 기능과 함께 수직의 갤러리 공간과 수평의 갤러리 공간을 유기적으로 융합합니다.',
+                img: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=600&auto=format&fit=crop',
+                // Handcrafted SVG representing the architectural "twist" gesture
+                svg: `<svg viewBox="0 0 100 100" class="w-16 h-16 stroke-current text-black dark:text-white fill-none" stroke-width="1.5">
+                        <path d="M 15,35 L 40,35 Q 50,50 60,65 L 85,65" />
+                        <path d="M 15,65 L 40,65 Q 50,50 60,35 L 85,35" />
+                        <path d="M 15,35 L 15,65 M 85,35 L 85,65 M 40,35 L 40,65 M 60,35 L 60,65" stroke-dasharray="2 2" />
+                        <path d="M 45,50 L 55,50" stroke="#10b981" stroke-width="2" />
+                      </svg>`
+            },
+            {
+                id: 'p2',
+                title: 'COPENHILL SKI-SLOPE',
+                year: 2021,
+                alphabetical: 'Copenhill Ski-slope',
+                typology: 'Infrastructure',
+                scale: 'XL',
+                scaleRank: 4,
+                status: 'Completed',
+                division: 'landscape',
+                location: 'Copenhagen, Denmark',
+                desc: '도시 친환경 발전소 지붕을 경사면으로 가공해 스키 슬로프와 하이킹 경로로 개척했습니다. 폐기물 에너지를 소각하며 재미있는 레저 문화를 도심 한복판으로 선사하는 "희생 없는 친환경"의 대표작입니다.',
+                img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=600&auto=format&fit=crop',
+                svg: `<svg viewBox="0 0 100 100" class="w-16 h-16 stroke-current text-black dark:text-white fill-none" stroke-width="1.5">
+                        <polygon points="10,80 85,80 85,25" />
+                        <path d="M 10,80 L 85,25" stroke="#10b981" stroke-width="2" />
+                        <circle cx="50" cy="50" r="4" fill="#10b981" />
+                      </svg>`
+            },
+            {
+                id: 'p3',
+                title: '8-HOUSE LOOP',
+                year: 2018,
+                alphabetical: '8-House Loop',
+                typology: 'Residential',
+                scale: 'L',
+                scaleRank: 3,
+                status: 'Completed',
+                division: 'architecture',
+                location: 'Copenhagen, Denmark',
+                desc: '평범한 고층 아파트 블록 구조를 피하고, 10층 높이까지 도달하는 긴 자전거 통로 램프와 무한대의 커뮤니티 연결을 수립하기 위해 "8"자 형태의 루프형 순환 매스로 배치 설계하였습니다.',
+                img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=600&auto=format&fit=crop',
+                svg: `<svg viewBox="0 0 100 100" class="w-16 h-16 stroke-current text-black dark:text-white fill-none" stroke-width="1.5">
+                        <path d="M 50,50 C 15,10 15,90 50,50 C 85,10 85,90 50,50" />
+                        <path d="M 50,50 C 15,10 15,90 50,50" stroke="#10b981" stroke-width="2" />
+                      </svg>`
+            },
+            {
+                id: 'p4',
+                title: 'COURTSCRAPER PYRAMID',
+                year: 2020,
+                alphabetical: 'Courtscraper Pyramid',
+                typology: 'Residential',
+                scale: 'L',
+                scaleRank: 3,
+                status: 'Completed',
+                division: 'planning',
+                location: 'New York, USA',
+                desc: '뉴욕의 전통적인 마당(Courtyard)형 저층 구조와 맨해튼 고층 타워(Skyscraper)의 극적 융합형인 피라미드 스킨 구조체. 허드슨강의 조망권과 완벽한 일사량을 세대 전체에 균등 배분합니다.',
+                img: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=600&auto=format&fit=crop',
+                svg: `<svg viewBox="0 0 100 100" class="w-16 h-16 stroke-current text-black dark:text-white fill-none" stroke-width="1.5">
+                        <polygon points="10,80 90,80 65,20" />
+                        <polygon points="35,80 65,80 50,50" stroke="#10b981" fill="rgba(16, 185, 129, 0.1)" />
+                      </svg>`
+            },
+            {
+                id: 'p5',
+                title: 'SUBMERGED MARITIME',
+                year: 2019,
+                alphabetical: 'Submerged Maritime',
+                typology: 'Public',
+                scale: 'M',
+                scaleRank: 2,
+                status: 'Completed',
+                division: 'landscape',
+                location: 'Elsinore, Denmark',
+                desc: '유네스코 성 인근의 조망을 방해하지 않기 위해 지상 위 건축물을 완전히 제거하고, 역사적인 폐쇄형 건조독(Dry Dock) 구조를 보존하여 지중 지하 갤러리 형태로 배치 공간을 매립시켰습니다.',
+                img: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=600&auto=format&fit=crop',
+                svg: `<svg viewBox="0 0 100 100" class="w-16 h-16 stroke-current text-black dark:text-white fill-none" stroke-width="1.5">
+                        <line x1="10" y1="35" x2="90" y2="35" />
+                        <polygon points="30,35 30,75 70,75 70,35" stroke="#10b981" fill="rgba(16, 185, 129, 0.1)" />
+                        <line x1="10" y1="75" x2="30" y2="75" stroke-dasharray="2 2" />
+                      </svg>`
+            },
+            {
+                id: 'p6',
+                title: 'WOVEN MOBILE CITY',
+                year: 2026,
+                alphabetical: 'Woven Mobile City',
+                typology: 'Planning',
+                scale: 'XL',
+                scaleRank: 4,
+                status: 'In Progress',
+                division: 'planning',
+                location: 'Shizuoka, Japan',
+                desc: '자율주행 모빌리티, 미크로 퍼스널 모빌리티, 보행 중심의 선형 공원이라는 3대 통행로 축을 직조물(Woven) 패턴으로 복합 배열한 미래형 인간공학 순환도시 가이드라인 프로젝트.',
+                img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=600&auto=format&fit=crop',
+                svg: `<svg viewBox="0 0 100 100" class="w-16 h-16 stroke-current text-black dark:text-white fill-none" stroke-width="1.5">
+                        <path d="M 10,20 Q 50,80 90,20" stroke="#10b981" />
+                        <path d="M 10,50 Q 50,50 90,50" />
+                        <path d="M 10,80 Q 50,20 90,80" />
+                      </svg>`
+            },
+            {
+                id: 'p7',
+                title: 'OCEANIX MARITIME',
+                year: 2025,
+                alphabetical: 'Oceanix Maritime',
+                typology: 'Planning',
+                scale: 'XL',
+                scaleRank: 4,
+                status: 'In Progress',
+                division: 'planning',
+                location: 'Busan, South Korea',
+                desc: '기후 위기로 해수면이 상승하는 연안 도시에 최적화된 모듈러 플로팅 해상 도시 계획안. 자가 발전과 스마트 물류 시스템이 스스로 순환 작동하는 영구적 해상 플랫폼 구조입니다.',
+                img: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=600&auto=format&fit=crop',
+                svg: `<svg viewBox="0 0 100 100" class="w-16 h-16 stroke-current text-black dark:text-white fill-none" stroke-width="1.5">
+                        <polygon points="30,20 70,20 90,50 70,80 30,80 10,50" stroke="#10b981" />
+                        <circle cx="50" cy="50" r="10" />
+                      </svg>`
+            },
+            {
+                id: 'p8',
+                title: 'ATELIER S-CABIN',
+                year: 2024,
+                alphabetical: 'Atelier S-Cabin',
+                typology: 'Residential',
+                scale: 'S',
+                scaleRank: 1,
+                status: 'Completed',
+                division: 'interiors',
+                location: 'Seoul, Korea',
+                desc: '도심 속 극소 필지(Micro-Site)에 설계된 마이크로 주택. 모듈러 가구 파티션을 자유롭게 여닫아 낮에는 아뜰리에 갤러리로, 밤에는 주거 아파트로 가변 변신하는 트랜스포머 공간 구조입니다.',
+                img: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=600&auto=format&fit=crop',
+                svg: `<svg viewBox="0 0 100 100" class="w-16 h-16 stroke-current text-black dark:text-white fill-none" stroke-width="1.5">
+                        <rect x="25" y="25" width="50" height="50" />
+                        <line x1="25" y1="25" x2="75" y2="75" stroke="#10b981" />
+                        <line x1="75" y1="25" x2="25" y2="75" />
+                      </svg>`
+            },
+            {
+                id: 'p9',
+                title: 'CURVE GRID LAMP',
+                year: 2022,
+                alphabetical: 'Curve Grid Lamp',
+                typology: 'Product',
+                scale: 'S',
+                scaleRank: 1,
+                status: 'Completed',
+                division: 'products',
+                location: 'Copenhagen, Denmark',
+                desc: '건축 구조물의 매스 기하학 형태를 리하르트 가구 스케일로 축소한 다층 구조 램프. 직간접 조명 루버 핀이 방 전체에 모던한 광량을 균등 배출합니다.',
+                img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=600&auto=format&fit=crop',
+                svg: `<svg viewBox="0 0 100 100" class="w-16 h-16 stroke-current text-black dark:text-white fill-none" stroke-width="1.5">
+                        <circle cx="50" cy="50" r="30" />
+                        <line x1="20" y1="50" x2="80" y2="50" stroke="#10b981" />
+                        <line x1="50" y1="20" x2="50" y2="80" stroke="#10b981" />
+                      </svg>`
+            }
+        ];
+
+        let currentSort = 'chronology';
+        let currentDivision = 'all';
+
+        // --- 2. RENDER MATRIX GRID WITH SORT & FILTERS ---
+        function renderMatrix() {
+            const grid = document.getElementById('project-matrix-grid');
+            grid.innerHTML = '';
+
+            // Filter
+            let filtered = [...projects];
+            if (currentDivision !== 'all') {
+                filtered = filtered.filter(p => p.division === currentDivision);
+            }
+
+            // Sort
+            if (currentSort === 'chronology') {
+                // Descending by Year
+                filtered.sort((a, b) => b.year - a.year);
+            } else if (currentSort === 'alphabetical') {
+                filtered.sort((a, b) => a.alphabetical.localeCompare(b.alphabetical));
+            } else if (currentSort === 'typology') {
+                filtered.sort((a, b) => a.typology.localeCompare(b.typology));
+            } else if (currentSort === 'scale') {
+                // S to XL (Ascending rank)
+                filtered.sort((a, b) => a.scaleRank - b.scaleRank);
+            } else if (currentSort === 'status') {
+                filtered.sort((a, b) => a.status.localeCompare(b.status));
+            }
+
+            // Draw Cards
+            filtered.forEach(p => {
+                const cell = document.createElement('div');
+                cell.className = 'matrix-cell bg-white dark:bg-[#0a0a0a] border-b border-r border-black dark:border-white p-6 md:p-8 flex flex-col justify-between h-80 cursor-pointer relative group overflow-hidden';
+                cell.setAttribute('onclick', `openModal('${p.id}')`);
+
+                cell.innerHTML = `
+                    <!-- Project metadata bar -->
+                    <div class="flex justify-between items-start z-10">
+                        <span class="text-[10px] font-mono text-gray-400 uppercase">${p.typology}</span>
+                        <span class="text-[10px] font-mono font-bold bg-black text-white dark:bg-white dark:text-black px-1.5 py-0.5 uppercase">${p.scale}</span>
+                    </div>
+
+                    <!-- Handcrafted Gestural SVG Diagram (Centerpiece) -->
+                    <div class="my-auto flex justify-center items-center z-10 transition-transform duration-500 diagram-svg">
+                        ${p.svg}
+                    </div>
+
+                    <!-- Project footer text -->
+                    <div class="space-y-1.5 z-10">
+                        <div class="flex justify-between items-baseline">
+                            <h3 class="font-grotesk text-sm font-bold tracking-tight uppercase group-hover:text-big-accent transition-colors">${p.title}</h3>
+                            <span class="text-[10px] font-mono text-gray-400">${p.year}</span>
+                        </div>
+                        <p class="text-[9px] font-mono text-gray-500 line-clamp-1">${p.location} • ${p.status}</p>
+                    </div>
+
+                    <!-- Hover background image peek with geometric overlay -->
+                    <div class="absolute inset-0 bg-cover bg-center opacity-0 group-hover:opacity-10 transition-opacity duration-500" style="background-image: url('${p.img}')"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-40 transition-opacity duration-500"></div>
+                `;
+                grid.appendChild(cell);
+            });
+        }
+
+        // --- 3. HANDLE MATRIX SORT & DIVISIONS ---
+        function sortMatrix(criteria) {
+            currentSort = criteria;
+            
+            // Toggle classes
+            ['chronology', 'alphabetical', 'typology', 'scale', 'status'].forEach(id => {
+                const btn = document.getElementById(`btn-sort-${id}`);
+                if (id === criteria) {
+                    btn.className = "px-3 py-1.5 border border-black dark:border-white bg-black text-white dark:bg-white dark:text-black transition-all";
+                } else {
+                    btn.className = "px-3 py-1.5 border border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all";
+                }
+            });
+
+            renderMatrix();
+        }
+
+        function filterDivision(div) {
+            currentDivision = div;
+            
+            // Toggle button highlights
+            const buttons = document.querySelectorAll('.div-filter-btn');
+            buttons.forEach(btn => {
+                const bDiv = btn.getAttribute('data-div');
+                if (bDiv === div) {
+                    btn.className = "div-filter-btn px-3 py-1.5 bg-big-accent text-white font-bold";
+                } else {
+                    btn.className = "div-filter-btn px-3 py-1.5 border border-black/10 dark:border-white/10 hover:border-big-accent";
+                }
+            });
+
+            renderMatrix();
+        }
+
+        // --- 4. STEP-BY-STEP DIAGRAM STEPPER ENGINE (YES IS MORE) ---
+        const diagramSteps = {
+            1: {
+                title: "1. Base Monolithic Block",
+                desc: "프로그램 공간에 할당된 전체 허용 규모를 대지 경계면에 직육면체(Monolithic Box) 구조체로 우선 설계해 공간의 기준점을 도출합니다.",
+                svg: `<svg viewBox="0 0 120 120" class="w-48 h-48 stroke-current text-white fill-none" stroke-width="1.5">
+                        <rect x="30" y="30" width="60" height="60" />
+                        <line x1="30" y1="30" x2="50" y2="15" />
+                        <line x1="90" y1="30" x2="110" y2="15" />
+                        <line x1="90" y1="90" x2="110" y2="75" />
+                        <line x1="50" y1="15" x2="110" y2="15" />
+                        <line x1="110" y1="15" x2="110" y2="75" />
+                        <text x="5" y="15" font-family="monospace" font-size="8" fill="#10b981">MAX BOUNDS</text>
+                      </svg>`
+            },
+            2: {
+                title: "2. Diagonal Wedge / Ski-slope Slice",
+                desc: "도심 주변 이웃의 해 조망권과 완벽한 태양 고도 입체각에 따라 지붕면을 대각선 쐐기(Wedge) 모양으로 경사지게 깎아냅니다. 이것은 스키장 슬로프로 기능합니다.",
+                svg: `<svg viewBox="0 0 120 120" class="w-48 h-48 stroke-current text-white fill-none" stroke-width="1.5">
+                        <polygon points="20,90 100,90 100,30" />
+                        <line x1="100" y1="30" x2="115" y2="15" />
+                        <line x1="100" y1="90" x2="115" y2="75" />
+                        <line x1="115" y1="15" x2="115" y2="75" />
+                        <line x1="20" y1="90" x2="35" y2="75" />
+                        <line x1="35" y1="75" x2="115" y2="15" />
+                        <path d="M 35,75 L 115,15" stroke="#10b981" stroke-width="2" />
+                        <text x="45" y="40" font-family="monospace" font-size="8" fill="#10b981">SLOPED ROOF</text>
+                      </svg>`
+            },
+            3: {
+                title: "3. Courtyard Carving for Light",
+                desc: "블록 중심부를 관통하며 내부 공기와 빛이 전체 세대에 골고루 흘러 들여갈 수 있도록 도심 정원 형태의 원형 통풍 기둥을 완전히 도려내 비워냅니다.",
+                svg: `<svg viewBox="0 0 120 120" class="w-48 h-48 stroke-current text-white fill-none" stroke-width="1.5">
+                        <rect x="25" y="25" width="70" height="70" />
+                        <ellipse cx="60" cy="60" rx="20" ry="20" stroke="#10b981" fill="rgba(16, 185, 129, 0.1)" />
+                        <line x1="25" y1="25" x2="45" y2="10" stroke-dasharray="2 2" />
+                        <line x1="95" y1="25" x2="115" y2="10" stroke-dasharray="2 2" />
+                        <text x="45" y="63" font-family="monospace" font-size="8" fill="#10b981">COURTYARD</text>
+                      </svg>`
+            },
+            4: {
+                title: "4. The Twisted Loop Bridge Connection",
+                desc: "동선 효율과 교차 수자원 정화를 위해 건물 양 끝 경사면을 90도 회전 트위스트하여 통행이 자유로운 무한대(Infinity Loop) 순환 가교를 완성합니다.",
+                svg: `<svg viewBox="0 0 120 120" class="w-48 h-48 stroke-current text-white fill-none" stroke-width="1.5">
+                        <path d="M 20,40 Q 60,100 100,40" stroke="#10b981" stroke-width="2" />
+                        <path d="M 20,80 Q 60,20 100,80" />
+                        <circle cx="43" cy="50" r="3" fill="#10b981" />
+                        <circle cx="77" cy="50" r="3" fill="#10b981" />
+                        <text x="35" y="95" font-family="monospace" font-size="8" fill="#10b981">LOOP COMPLETE</text>
+                      </svg>`
+            }
+        };
+
+        function changeStep(stepNum) {
+            // Update buttons layout
+            document.querySelectorAll('.step-nav-btn').forEach((btn, idx) => {
+                if (idx + 1 === stepNum) {
+                    btn.className = "step-nav-btn w-12 h-12 border border-white font-mono font-bold bg-white text-black transition-all";
+                } else {
+                    btn.className = "step-nav-btn w-12 h-12 border border-white/30 font-mono font-bold hover:border-white transition-all";
+                }
+            });
+
+            // Set info
+            const step = diagramSteps[stepNum];
+            document.getElementById('step-count').textContent = `STEP 0${stepNum} / 04`;
+            document.getElementById('step-title').textContent = step.title;
+            document.getElementById('step-desc').textContent = step.desc;
+            document.getElementById('step-svg-holder').innerHTML = step.svg;
+        }
+
+        // --- 5. DETAILED BLUEPRINT MODAL ENGINE ---
+        const modal = document.getElementById('project-modal');
+        const modalContainer = document.getElementById('modal-blueprint-container');
+
+        function openModal(id) {
+            const p = projects.find(proj => proj.id === id);
+            if (!p) return;
+
+            modalContainer.innerHTML = `
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 p-6 md:p-10">
+                    
+                    <!-- Left Column: Visual Blueprint -->
+                    <div class="lg:col-span-6 space-y-4">
+                        <div class="aspect-video rounded-sm overflow-hidden bg-zinc-100 dark:bg-zinc-900 border border-black dark:border-white flex items-center justify-center p-6 relative">
+                            <img src="${p.img}" class="absolute inset-0 w-full h-full object-cover opacity-20" alt="${p.title}">
+                            <div class="z-10 scale-150">
+                                ${p.svg}
+                            </div>
+                        </div>
+                        <div class="p-4 bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 rounded font-mono text-[11px] space-y-2">
+                            <span class="text-big-accent font-bold uppercase tracking-wider block">Architectural Blueprint Specs</span>
+                            <div class="grid grid-cols-2 gap-2 text-gray-600 dark:text-zinc-400">
+                                <div><span class="text-black dark:text-white font-bold">LOCATION:</span> ${p.location}</div>
+                                <div><span class="text-black dark:text-white font-bold">YEAR:</span> ${p.year}</div>
+                                <div><span class="text-black dark:text-white font-bold">SCALE:</span> ${p.scale}</div>
+                                <div><span class="text-black dark:text-white font-bold">STATUS:</span> ${p.status}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Concept Matrix & Specs -->
+                    <div class="lg:col-span-6 flex flex-col justify-between space-y-6">
+                        <div class="space-y-4">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-big-accent font-mono text-xs uppercase tracking-widest">${p.typology}</span>
+                                <span class="text-gray-400 font-mono text-xs">•</span>
+                                <span class="text-gray-400 font-mono text-xs uppercase">${p.division} division</span>
+                            </div>
+                            <h3 class="font-grotesk text-2xl md:text-3xl font-extrabold tracking-tight uppercase leading-none text-black dark:text-white">
+                                ${p.title}
+                            </h3>
+                            <div class="h-[2px] bg-big-accent w-20"></div>
+                            <p class="text-xs md:text-sm text-gray-600 dark:text-zinc-300 leading-relaxed">${p.desc}</p>
+                        </div>
+
+                        <!-- Pragmatic Statement -->
+                        <div class="bg-big-accent/5 p-4 border-l-2 border-big-accent rounded-r font-mono text-[11px]">
+                            <span class="text-big-accent font-bold uppercase block mb-1">Pragmatic Utopian Statement</span>
+                            우리는 이 복합적인 물리적 구조 한계를 극복하기 위해 다층 삼중 통풍 융합 설계를 도입하였으며, BIM 시뮬레이션을 통해 최종 0.1%의 설계 오차를 보증했습니다.
+                        </div>
+
+                        <!-- CTA Contact Form inside Modal -->
+                        <div class="flex justify-end pt-4">
+                            <a href="#contact" onclick="closeModal()" class="bg-black text-white dark:bg-white dark:text-black font-mono font-bold text-[10px] tracking-widest uppercase px-6 py-3 border border-black dark:border-white hover:bg-big-accent hover:text-white dark:hover:bg-big-accent dark:hover:text-white transition-all">
+                                Consult This Structural Typology
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            `;
+
+            modal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }
+
+        // Close bindings
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // --- 6. PREFER THEME DARK/LIGHT MODE TOGGLER ---
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+        }
+
+        // Set Default Theme (Dark Mode Preferred for premium architectural layout)
+        document.documentElement.classList.add('dark');
+
+        // --- 7. CONTACT FORM LOGIC ---
+        const form = document.getElementById('matrix-inquiry-form');
+        const formSuccess = document.getElementById('form-success');
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            form.classList.add('opacity-30', 'pointer-events-none');
+            setTimeout(() => {
+                form.classList.add('hidden');
+                form.classList.remove('opacity-30', 'pointer-events-none');
+                formSuccess.classList.remove('hidden');
+            }, 1000);
+        }
+
+        function resetForm() {
+            form.reset();
+            formSuccess.classList.add('hidden');
+            form.classList.remove('hidden');
+        }
+
+        // Init page load functions
+        window.onload = function() {
+            renderMatrix();
+            changeStep(1);
+        }
+    </script>
+</body>
+</html>
